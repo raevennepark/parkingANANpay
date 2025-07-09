@@ -2,60 +2,55 @@
 <html>
 <head>
   <meta charset="UTF-8">
-  <title>Payment</title>
+  <title>ESP32 Payment</title>
   <style>
     html, body {
       margin: 0;
       padding: 0;
       height: 100%;
       overflow: hidden;
+      background-color: black;
     }
 
     body {
-      background: url('https://i.ibb.co/fdMJv9nf/download.jpg') no-repeat center center fixed;
+      background: url('https://i.ibb.co/fdMJv9nf/download.jpg') no-repeat center center;
       background-size: cover;
       position: relative;
     }
 
     #payButton {
       position: absolute;
-      top: 64.2%; /* Adjust to perfectly overlay */
+      top: 64.2%;  /* Adjust if needed */
       left: 50%;
       transform: translateX(-50%);
       width: 230px;
       height: 52px;
-      background-color: #0084ff;
-      color: white;
-      font-size: 18px;
-      font-weight: bold;
+      background-color: transparent;
       border: none;
-      border-radius: 10px;
       cursor: pointer;
-      box-shadow: 0 4px 6px rgba(0,0,0,0.3);
-      transition: transform 0.1s ease-in-out;
     }
 
     #payButton:active {
-      transform: translateX(-50%) scale(0.98);
+      filter: brightness(90%);
     }
   </style>
 </head>
 <body>
-  <button id="payButton" onclick="sendPayment()">Pay ₱100.00</button>
+  <button id="payButton" onclick="pay()"> </button>
 
   <script>
-    function sendPayment() {
+    function pay() {
       setTimeout(() => {
         fetch("http://192.168.4.123/pay")
           .then(response => {
             if (response.ok) {
-              alert("Payment Success!");
+              window.location.href = "https://i.ibb.co/ynFCLQbh/gcash-succesful.jpg";
             } else {
               alert("Payment failed.");
             }
           })
-          .catch(err => {
-            alert("Error: " + err.message);
+          .catch(error => {
+            alert("Error: " + error.message);
           });
       }, 1000);
     }
