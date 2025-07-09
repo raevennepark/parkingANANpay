@@ -20,24 +20,23 @@
 
     #payButton {
       position: absolute;
-      top: 64.2%;       /* Adjust this until it fits the button in your image */
       left: 50%;
-      transform: translateX(-50%);
+      top: 82.2%; /* Adjusted carefully to match your picture on most phones */
+      transform: translate(-50%, -50%);
       width: 230px;
       height: 52px;
-      background-color: rgba(255, 0, 0, 0.3);  /* Make it visible for testing */
-      border: 2px solid red;                   /* Debugging border */
-      cursor: pointer;
+      background-color: rgba(255, 0, 0, 0.3);  /* TEMP: visible red box for testing */
+      border: 2px solid red;
       z-index: 10;
+      cursor: pointer;
     }
 
     #payButton:active {
-      filter: brightness(90%);
+      filter: brightness(85%);
     }
   </style>
 </head>
 <body>
-  <!-- This is the test button -->
   <div id="payButton" onclick="pay()"></div>
 
   <script>
@@ -48,11 +47,11 @@
             if (response.ok) {
               window.location.href = "https://i.ibb.co/ynFCLQbh/gcash-succesful.jpg";
             } else {
-              alert("Payment failed.");
+              alert("ESP32 failed to respond.");
             }
           })
-          .catch(error => {
-            alert("Could not reach ESP32: " + error.message);
+          .catch(err => {
+            alert("ESP32 not reachable: " + err.message);
           });
       }, 1000);
     }
