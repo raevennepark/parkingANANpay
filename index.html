@@ -1,60 +1,49 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>ESP32 Payment</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Gcash Payment UI</title>
   <style>
-    html, body {
+    body, html {
       margin: 0;
       padding: 0;
       height: 100%;
-      overflow: hidden;
-      background-color: black;
+      background: #fff;
     }
 
-    body {
-      background: url('https://i.ibb.co/fdMJv9nf/download.jpg') no-repeat center center;
-      background-size: cover;
+    .wrapper {
       position: relative;
+      width: 100%;
+      max-width: 600px;
+      margin: 0 auto;
     }
 
-    #payButton {
+    .wrapper img {
+      width: 100%;
+      height: auto;
+      display: block;
+    }
+
+    .pay-btn {
       position: absolute;
       left: 50%;
-      top: 90%; /* still slightly moved down */
-      transform: translate(-50%, -50%);
-      width: 95%;        /* full width */
-      height: 160px;     /* increased height */
-      background-color: rgba(255, 0, 0, 0.2);  /* TEMP visible */
-      border: 2px solid red;
-      z-index: 10;
+      transform: translateX(-50%);
+      bottom: 5.5%; /* Adjust this % to move the button up/down */
+      width: 80%;
+      height: 8%;
+      background: transparent;
+      border: none;
       cursor: pointer;
-    }
-
-    #payButton:active {
-      filter: brightness(85%);
     }
   </style>
 </head>
 <body>
-  <div id="payButton" onclick="pay()"></div>
-
-  <script>
-    function pay() {
-      setTimeout(() => {
-        fetch("http://192.168.4.123/pay")
-          .then(response => {
-            if (response.ok) {
-              window.location.href = "https://i.ibb.co/ynFCLQbh/gcash-succesful.jpg";
-            } else {
-              alert("ESP32 failed to respond.");
-            }
-          })
-          .catch(err => {
-            alert("ESP32 not reachable: " + err.message);
-          });
-      }, 1000);
-    }
-  </script>
+  <div class="wrapper">
+    <img src="https://i.ibb.co/tp2qW8wF/0f727090-908b-41bf-9c8b-776cd3e3b9b2.jpg" alt="GCash Payment Screenshot" />
+    <form action="https://i.ibb.co/ynFCLQbh/gcash-succesful.jpg">
+      <button class="pay-btn" type="submit"></button>
+    </form>
+  </div>
 </body>
 </html>
