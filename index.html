@@ -4,34 +4,47 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>Parking Master Control Login</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 <style>
-  :root{--bg:#0f1724;--card:#0b1220;--accent:#7dd3fc;--muted:#9aa6b2;--radius:14px;}
+  :root{
+    --bg:#0f1724;
+    --card:#0b1220;
+    --accent:#7dd3fc;
+    --muted:#9aa6b2;
+    --radius:14px;
+    --slot-bg: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+  }
   *{box-sizing:border-box}
   html,body{height:100%;margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,"Helvetica Neue",Arial;background:linear-gradient(180deg,var(--bg),#071021);color:#e6eef6}
-  .wrap{max-width:980px;margin:24px auto;padding:18px;display:flex;flex-direction:column;min-height:100vh;}
+  .wrap{max-width:980px;margin:24px auto;padding:18px;}
   header{display:flex;gap:12px;align-items:center;justify-content:space-between}
   h1{font-size:20px;margin:0}
   .sub{color:var(--muted);font-size:13px}
-  .card{background:rgba(255,255,255,0.02);padding:24px;border-radius:16px;box-shadow:0 6px 18px rgba(2,6,23,0.6);margin-top:24px;width:100%;}
+  .card{background:rgba(255,255,255,0.02);padding:16px;border-radius:16px;box-shadow:0 6px 18px rgba(2,6,23,0.6);margin-top:24px;display:flex;flex-direction:column;align-items:center;}
   footer{margin-top:18px;color:var(--muted);font-size:13px;text-align:center}
   
   /* Login form specific styles */
   .login-form-container{display:flex;flex-direction:column;align-items:center;text-align:center;padding:16px;}
   .login-form{display:flex;flex-direction:column;gap:16px;width:100%;max-width:400px;margin-top:24px;}
-  .login-form input{background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);color:#e6eef6;border-radius:8px;padding:12px 16px;font-size:16px;outline:none;transition:border-color 0.2s ease;}
+  .input-group{position:relative;width:100%;}
+  .login-form input{background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);color:#e6eef6;border-radius:8px;padding:12px 16px;font-size:16px;outline:none;transition:border-color 0.2s ease;width:100%;}
   .login-form input:focus{border-color:var(--accent);}
-  .login-form button{background:var(--accent);color:#0f1724;font-weight:600;padding:12px 16px;border-radius:8px;border:none;cursor:pointer;transition:background-color 0.2s ease, transform 0.2s ease;}
-  .login-form button:hover{background:#38bdf8;transform:translateY(-2px);}
+  .toggle-password{position:absolute;right:12px;top:50%;transform:translateY(-50%);cursor:pointer;color:var(--muted);}
+  .login-form button{background:var(--accent);color:#0f1724;font-weight:600;padding:12px 16px;border-radius:8px;border:none;cursor:pointer;transition:background-color 0.2s ease, transform 0.1s ease;}
+  .login-form button:hover{background:#38bdf8;}
+  .login-form button:active{transform:translateY(1px);}
   .message{color:#f87171;font-size:14px;margin-top:10px;min-height:20px;}
   
   /* Control panel specific styles */
-  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:14px;margin-top:16px}
-  .slot{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:12px;border-radius:12px;min-height:110px;background:linear-gradient(180deg,rgba(255,255,255,0.02),rgba(255,255,255,0.01));transition:transform 220ms ease, box-shadow 220ms ease}
+  .grid-container{width:100%;}
+  .grid{display:grid;grid-template-columns:repeat(3, 1fr);gap:14px;margin-bottom:14px;}
+  .slot{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:12px;border-radius:12px;min-height:110px;background:var(--slot-bg);transition:transform 220ms ease, box-shadow 220ms ease;border:1px solid rgba(255,255,255,0.08);}
   .slot:hover{transform:translateY(-4px);box-shadow:0 10px 24px rgba(2,6,23,0.6)}
   .slot-id{font-size:18px;margin:8px 0 4px}
-  .controls-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:14px;margin-top:24px;}
-  .control-box{background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);padding:20px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:600;cursor:pointer;transition:background-color 0.2s ease, transform 0.2s ease;}
-  .control-box:hover{background:rgba(255,255,255,0.08);transform:translateY(-2px);}
+  .controls-grid{display:grid;grid-template-columns:repeat(3, 1fr);gap:14px;margin-top:24px;width:100%;}
+  .control-box{background:var(--slot-bg);border:1px solid rgba(255,255,255,0.08);padding:20px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:600;cursor:pointer;transition:transform 0.1s ease;}
+  .control-box:hover{transform:translateY(-2px);}
+  .control-box:active{transform:translateY(1px);}
   
   @keyframes pop-in {
     0% { transform: scale(0.5); opacity: 0; }
@@ -54,7 +67,10 @@
     <div id="login-container" class="login-form-container">
       <h2>Master Control Panel</h2>
       <div class="login-form">
-        <input type="password" id="passwordInput" placeholder="Enter password" />
+        <div class="input-group">
+          <input type="password" id="passwordInput" placeholder="Enter password" />
+          <span class="toggle-password" id="togglePassword"><i class="fas fa-eye"></i></span>
+        </div>
         <button id="loginButton">Log In</button>
         <div id="message" class="message"></div>
       </div>
@@ -66,31 +82,100 @@
 <script>
   const correctPassword = "parkinganan_aer";
   const passwordInput = document.getElementById('passwordInput');
+  const togglePassword = document.getElementById('togglePassword');
   const loginButton = document.getElementById('loginButton');
   const messageDiv = document.getElementById('message');
   const contentContainer = document.getElementById('content-container');
   const NUM_SLOTS = 6;
+  let gateOpen = false;
+  let longPressInterval;
 
   function renderControlPanel() {
     contentContainer.innerHTML = `
       <div class="control-panel-container">
         <h2>Parking Control Panel</h2>
-        <div id="slotsGrid" class="grid" aria-live="polite"></div>
+        <div class="grid-container">
+            <div id="slotsGrid1" class="grid" aria-live="polite"></div>
+            <div id="slotsGrid2" class="grid" aria-live="polite"></div>
+        </div>
         <div class="controls-grid">
-          <div class="control-box">Counterclockwise</div>
-          <div class="control-box">Gate</div>
-          <div class="control-box">Clockwise</div>
+          <div class="control-box" id="counterclockwiseButton">Counterclockwise</div>
+          <div class="control-box" id="gateButton">Gate Closed</div>
+          <div class="control-box" id="clockwiseButton">Clockwise</div>
         </div>
       </div>
     `;
-    const slotsGrid = document.getElementById('slotsGrid');
+    const slotsGrid1 = document.getElementById('slotsGrid1');
+    const slotsGrid2 = document.getElementById('slotsGrid2');
     for(let i = 1; i <= NUM_SLOTS; i++){
       const el = document.createElement('div');
       el.className = 'slot';
       el.innerHTML = `<div class="slot-id">Slot ${i}</div>`;
-      slotsGrid.appendChild(el);
+      if (i <= 3) {
+        slotsGrid1.appendChild(el);
+      } else {
+        slotsGrid2.appendChild(el);
+      }
     }
+    
+    // Re-attach event listeners for the new elements
+    const gateButton = document.getElementById('gateButton');
+    const clockwiseButton = document.getElementById('clockwiseButton');
+    const counterclockwiseButton = document.getElementById('counterclockwiseButton');
+
+    gateButton.addEventListener('click', () => {
+      gateOpen = !gateOpen;
+      gateButton.textContent = gateOpen ? 'Gate Open' : 'Gate Closed';
+    });
+
+    // Long press functionality for clockwise and counterclockwise
+    const startLongPress = (action) => {
+      console.log('Long press started for ' + action);
+      longPressInterval = setInterval(() => {
+        console.log('Executing ' + action + ' action...');
+      }, 100);
+    };
+
+    const stopLongPress = () => {
+      console.log('Long press stopped.');
+      clearInterval(longPressInterval);
+    };
+
+    clockwiseButton.addEventListener('mousedown', (event) => {
+      if (event.button === 0) startLongPress('clockwise');
+    });
+    clockwiseButton.addEventListener('mouseup', stopLongPress);
+    clockwiseButton.addEventListener('mouseleave', stopLongPress);
+    clockwiseButton.addEventListener('touchstart', (event) => {
+        event.preventDefault(); // Prevent default browser touch behavior
+        startLongPress('clockwise');
+    });
+    clockwiseButton.addEventListener('touchend', stopLongPress);
+
+    counterclockwiseButton.addEventListener('mousedown', (event) => {
+      if (event.button === 0) startLongPress('counterclockwise');
+    });
+    counterclockwiseButton.addEventListener('mouseup', stopLongPress);
+    counterclockwiseButton.addEventListener('mouseleave', stopLongPress);
+    counterclockwiseButton.addEventListener('touchstart', (event) => {
+        event.preventDefault(); // Prevent default browser touch behavior
+        startLongPress('counterclockwise');
+    });
+    counterclockwiseButton.addEventListener('touchend', stopLongPress);
   }
+
+  togglePassword.addEventListener('click', () => {
+    const passwordIcon = togglePassword.querySelector('i');
+    const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+    passwordInput.setAttribute('type', type);
+    if (type === 'password') {
+        passwordIcon.classList.remove('fa-eye-slash');
+        passwordIcon.classList.add('fa-eye');
+    } else {
+        passwordIcon.classList.remove('fa-eye');
+        passwordIcon.classList.add('fa-eye-slash');
+    }
+  });
 
   loginButton.addEventListener('click', () => {
     const enteredPassword = passwordInput.value;
