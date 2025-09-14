@@ -1,100 +1,112 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>ESP32 Parking — Live Slots</title>
+<title>Parking Master Control Login</title>
 <style>
-  :root{--bg:#0f1724;--card:#0b1220;--accent:#7dd3fc;--muted:#9aa6b2;--slot-size:120px;--radius:14px;}
+  :root{--bg:#0f1724;--card:#0b1220;--accent:#7dd3fc;--muted:#9aa6b2;--radius:14px;}
   *{box-sizing:border-box}
   html,body{height:100%;margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,"Helvetica Neue",Arial;background:linear-gradient(180deg,var(--bg),#071021);color:#e6eef6}
-  .wrap{max-width:980px;margin:24px auto;padding:18px}
+  .wrap{max-width:980px;margin:24px auto;padding:18px;display:flex;flex-direction:column;min-height:100vh;}
   header{display:flex;gap:12px;align-items:center;justify-content:space-between}
   h1{font-size:20px;margin:0}
   .sub{color:var(--muted);font-size:13px}
-  .card{background:rgba(255,255,255,0.02);padding:16px;border-radius:16px;box-shadow:0 6px 18px rgba(2,6,23,0.6);margin-top:24px;}
+  .card{background:rgba(255,255,255,0.02);padding:24px;border-radius:16px;box-shadow:0 6px 18px rgba(2,6,23,0.6);margin-top:24px;flex:1;}
+  footer{margin-top:18px;color:var(--muted);font-size:13px;text-align:center}
+  .login-form-container, .control-panel-container{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;text-align:center;padding:16px;}
+  .login-form{display:flex;flex-direction:column;gap:16px;width:100%;max-width:400px;margin-top:24px;}
+  .login-form input{background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);color:#e6eef6;border-radius:8px;padding:12px 16px;font-size:16px;outline:none;transition:border-color 0.2s ease;}
+  .login-form input:focus{border-color:var(--accent);}
+  .login-form button{background:var(--accent);color:#0f1724;font-weight:600;padding:12px 16px;border-radius:8px;border:none;cursor:pointer;transition:background-color 0.2s ease, transform 0.2s ease;}
+  .login-form button:hover{background:#38bdf8;transform:translateY(-2px);}
+  .message{color:#f87171;font-size:14px;margin-top:10px;min-height:20px;}
+  
+  /* New styles for control panel */
   .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:14px;margin-top:16px}
   .slot{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:12px;border-radius:12px;min-height:110px;background:linear-gradient(180deg,rgba(255,255,255,0.02),rgba(255,255,255,0.01));transition:transform 220ms ease, box-shadow 220ms ease}
   .slot:hover{transform:translateY(-4px);box-shadow:0 10px 24px rgba(2,6,23,0.6)}
-  .badge{font-weight:700;padding:6px 10px;border-radius:999px;background:rgba(255,255,255,0.03);font-size:13px}
   .slot-id{font-size:18px;margin:8px 0 4px}
-  .uid{font-size:12px;color:var(--muted);word-break:break-all;text-align:center}
-  .empty{background:linear-gradient(180deg,rgba(34,197,94,0.14),rgba(34,197,94,0.06));border:1px solid rgba(34,197,94,0.18)}
-  .occupied{background:linear-gradient(180deg,rgba(239,68,68,0.14),rgba(239,68,68,0.06));border:1px solid rgba(239,68,68,0.18)}
-  .status-row{display:flex;gap:10px;align-items:center}
-  .dot{width:10px;height:10px;border-radius:999px;background:red;box-shadow:0 0 8px rgba(255,0,0,0.25)}
-  .dot.online{background:green;box-shadow:0 0 12px rgba(0,255,0,0.18)}
-  footer{margin-top:18px;color:var(--muted);font-size:13px;text-align:center}
-  @media (max-width:480px){:root{--slot-size:100px}h1{font-size:16px}}
+  .controls-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:14px;margin-top:24px;}
+  .control-box{background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);padding:20px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:600;cursor:pointer;transition:background-color 0.2s ease, transform 0.2s ease;}
+  .control-box:hover{background:rgba(255,255,255,0.08);transform:translateY(-2px);}
+
+  @keyframes pop-in {
+    0% { transform: scale(0.5); opacity: 0; }
+    100% { transform: scale(1); opacity: 1; }
+  }
+  .login-form-container h2, .control-panel-container h2{animation: pop-in 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55);}
+  @media (max-width:480px){h1{font-size:16px}}
 </style>
 </head>
 <body>
 <div class="wrap">
 <header>
   <div>
-    <h1>parkingANAN — Live Slots</h1>
-    <div class="sub">Poblacion, Talibon, Bohol</div>
-  </div>
-  <div class="status-row">
-    <div class="dot" id="conn-dot"></div>
-    <div id="conn-text" class="sub">Connecting…</div>
+    <h1>parkingANAN — Master Control</h1>
+    <div class="sub">Poblacion, Talibon, Bohol Parking Management</div>
   </div>
 </header>
 <main class="card">
-  <div class="sub">6 Slots — Auto-updates via WebSocket</div>
-  <div id="slotsGrid" class="grid" aria-live="polite" style="margin-top:12px"></div>
-  <footer><b>AER</b></footer>
+  <div id="login-container" class="login-form-container">
+    <h2>Master Control Panel</h2>
+    <div class="login-form">
+      <input type="password" id="passwordInput" placeholder="Enter password" />
+      <button id="loginButton">Log In</button>
+      <div id="message" class="message"></div>
+    </div>
+  </div>
+
+  <div id="control-panel-container" class="control-panel-container" style="display:none;">
+    <h2>Parking Control Panel</h2>
+    <div id="slotsGrid" class="grid" aria-live="polite"></div>
+    <div class="controls-grid">
+      <div class="control-box">Counterclockwise</div>
+      <div class="control-box">Gate</div>
+      <div class="control-box">Clockwise</div>
+    </div>
+  </div>
 </main>
+<footer><b>AER Corporation</b></footer>
 </div>
 <script>
-const WS_HOST = `ws://${location.hostname}:81/`;
-const NUM_SLOTS = 6;
-const grid = document.getElementById('slotsGrid');
-const connDot = document.getElementById('conn-dot');
-const connText = document.getElementById('conn-text');
+  const correctPassword = "parkinganan_aer";
+  const passwordInput = document.getElementById('passwordInput');
+  const loginButton = document.getElementById('loginButton');
+  const messageDiv = document.getElementById('message');
+  const loginContainer = document.getElementById('login-container');
+  const controlPanelContainer = document.getElementById('control-panel-container');
+  const slotsGrid = document.getElementById('slotsGrid');
+  const NUM_SLOTS = 6;
 
-function makeSlots(){
-  grid.innerHTML = '';
-  for(let i=1;i<=NUM_SLOTS;i++){
-    const el = document.createElement('div');
-    el.className = 'slot empty';
-    el.innerHTML = `
-      <div class="slot-id">Slot ${i}</div>
-      <div class="badge">Empty</div>
-      <div class="uid" id="uid-${i}">-</div>
-    `;
-    grid.appendChild(el);
+  function renderSlots() {
+    slotsGrid.innerHTML = '';
+    for(let i = 1; i <= NUM_SLOTS; i++){
+      const el = document.createElement('div');
+      el.className = 'slot';
+      el.innerHTML = `<div class="slot-id">Slot ${i}</div>`;
+      slotsGrid.appendChild(el);
+    }
   }
-}
 
-makeSlots();
+  loginButton.addEventListener('click', () => {
+    const enteredPassword = passwordInput.value;
+    if (enteredPassword === correctPassword) {
+      messageDiv.textContent = "";
+      loginContainer.style.display = "none";
+      controlPanelContainer.style.display = "flex";
+      renderSlots();
+    } else {
+      messageDiv.textContent = "Incorrect password. Please try again.";
+      passwordInput.value = "";
+    }
+  });
 
-let ws;
-function connectWS(){
-  ws = new WebSocket(WS_HOST);
-  ws.onopen = () => {
-    connDot.classList.add('online');
-    connText.textContent = 'Online';
-  };
-  ws.onclose = () => {
-    connDot.classList.remove('online');
-    connText.textContent = 'Reconnecting…';
-    setTimeout(connectWS,2000);
-  };
-  ws.onmessage = (msg) => {
-    try{
-      const data = JSON.parse(msg.data);
-      data.forEach((slot,i) => {
-        const el = grid.children[i];
-        if(!el) return;
-        el.className = 'slot ' + (slot.occupied ? 'occupied' : 'empty');
-        el.querySelector('.badge').textContent = slot.occupied ? 'Occupied' : 'Empty';
-        el.querySelector('.uid').textContent = slot.uid || '-';
-      });
-    }catch(e){console.error('Invalid WS data',e);}
-  };
-}
-connectWS();
+  passwordInput.addEventListener('keydown', (event) => {
+    if (event.key === 'Enter') {
+      loginButton.click();
+    }
+  });
 </script>
 </body>
 </html>
